@@ -1,0 +1,12 @@
+un'array di strutture in cui ogni struttura e` composta dall'effettivo valore che assume la casella 0 se e` blank
+e un array di possibili numeri che possono occupare quella casella (naturalmente se non e` stato inserito nessun numero)
+#################################################################################################################################
+
+I controlli verticali e orizzontali e all'interno del quadrato tolgono le possibilita` dall'array e le sostituiscono con degli 0
+se il programma arriva ad un punto di stallo prende un qualsiasi numero dall'array delle possibillita` e lo inserisce come valore
+della casella
+
+***************************************************************************************************************************************
+
+Implementare un controllo che se non riesce piu` a trovare soluzioni possibili ritorna al punto in cui poteva scegliere
+una possibilita` e far in modo di scegliere la successiva
