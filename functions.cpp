@@ -1,4 +1,6 @@
-#include <stdio.h>
+#include <iostream>
 
-char list[9][9] = {
+int main()
+{
 	
+}
