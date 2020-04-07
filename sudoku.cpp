@@ -1,14 +1,32 @@
-/*
- *
- * Sudoku resolver 
- *
- */
-#include <stdio.h>
+#include<iostream>
+#include"functions.hpp"
 
-int main(){
+int main()
+{
 
-    char string[82];
+    GRID::grid sudoku;
+    char answer = 'n';
 
-    printf("Inserire la griglia : ");
-    scanf("%s", string);
-};
+    std::cout << "Hai un sudoku da risolvere [s|n] : ";
+    std::cin >> answer;
+
+    if (answer == 'y')
+    {
+        sudoku.importGrid();
+
+        // controlli //
+
+        // immetere valori //
+
+        // mostrare la soluzione //
+
+    }
+    else
+    {
+        
+    }
+    
+
+
+    return 0;
+}
