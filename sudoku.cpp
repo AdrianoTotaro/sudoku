@@ -1,3 +1,9 @@
+/*
+*   Backtracking method for
+*   solving sudoku, how backtracking works?
+*   https://en.wikipedia.org/wiki/Sudoku_solving_algorithms
+*/
+
 #include<iostream>
 #include"functions.hpp"
 
@@ -15,7 +21,7 @@ int main()
         sudoku.importGrid();
 
         // controlli //
-
+        
         // immetere valori //
 
         // mostrare la soluzione //

@@ -24,11 +24,48 @@ void GRID::grid::importGrid(){
     {
         for ( j = 0; j < 9; j++)
         {
-            cellValue[i][j] = sudokuMap[k];
+            cellValue[i][j].value = sudokuMap[k];
             k++;
+
+            if(cellValue[i][j].value != 0)
+                cellValue[i][j].userValue = 1;
         }
     }
     
 
 
+}
+
+int GRID::grid::backtracking()
+{
+    int i, j, k;
+    int breakpoint[2];
+    cell *cellPointer;
+    bool atLeastOneValid;
+
+    for(i = 0; i < 9; i++)
+    {
+        for ( j = 0; j < 9; j++)
+        {
+            cellPointer = &cellValue[i][j];
+
+            if(cellPointer->value == 0)
+            {
+                atLeastOneValid = true;
+
+                for(k = 1; k <= 9; k++)
+                {
+                    cellPointer->value = k;
+
+                    if (orizzControll(cellPointer) && squareControll(cellPointer) && verticalControll(cellPointer))
+                        break;
+                    else if(k == 9)
+                        atLeastOneValid = false;
+                    
+                }
+            }
+
+        }
+        
+    }
 }
