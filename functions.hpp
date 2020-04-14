@@ -14,18 +14,18 @@ namespace GRID
 
         cell cellValue[9][9];
 
-        bool orizzControll(cell *);
-        bool squareControll(cell *);
-        bool verticalControll(cell *);
+        bool orizzControll(int x, int y);
+        bool squareControll(int x, int y);
+        bool verticalControll(int x, int y);
+        bool controlls(int x, int y);
 
         public:
 
             grid(); // set all cell value to 0 //
             void importGrid();
-            int backtracking();
-
-
-
+            void importFromFile(std::string);
+            void backtracking();
+            void printGrid();
     };
 }
 

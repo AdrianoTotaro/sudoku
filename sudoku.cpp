@@ -16,23 +16,18 @@ int main()
     std::cout << "Hai un sudoku da risolvere [s|n] : ";
     std::cin >> answer;
 
-    if (answer == 'y')
+    if (answer == 's')
     {
         sudoku.importGrid();
 
         // controlli //
-        
+        sudoku.backtracking();
+
         // immetere valori //
 
         // mostrare la soluzione //
+        sudoku.printGrid();
 
     }
-    else
-    {
-        
-    }
-    
-
-
     return 0;
 }
