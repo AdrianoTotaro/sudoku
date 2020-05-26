@@ -1,20 +1,31 @@
 #include<iostream>
 #include<fstream>
 #include"functions.hpp"
-
+#include<vector>
+#include<list>
+#include<exception>
 
 //=========Inizializza tutte le celle a 0============//
 GRID::grid::grid(){
 
     int i, j;
 
-    //magari aggiungere un sudoku default da file //
-
     for (i = 0; i < 9; i++)
         for ( j = 0; j < 9; j++)
-            cellValue[i][j].value = 0;
+            cellValue[i][j]= 0;
 }
 
+GRID::Coordinate::Coordinate()
+{
+    coord.first = 0;
+    coord.second = 0;
+}
+
+GRID::Coordinate::Coordinate(int x, int y)
+{
+    coord.first = x;
+    coord.second = y;
+}
 
 //=================Fa inserire il sudoku all'utente=============//
 void GRID::grid::importGrid(){
@@ -29,16 +40,12 @@ void GRID::grid::importGrid(){
     {
         for ( j = 0; j < 9; j++)
         {
-            cellValue[i][j].value = sudokuMap[k];
+            GRID::Coordinate coord(j, i);
+            
+            cellValue[i][j] = sudokuMap[k] - '0';
             k++;
-
-            if(cellValue[i][j].value != 0)
-                cellValue[i][j].userValue = 1;
         }
     }
-    
-
-
 }
 
 //============Importa il sudoku da un file==================//
@@ -51,71 +58,64 @@ void GRID::grid::importFromFile(std::string fileName)
     for(i = 0; i < 9; i++)
     {
         getline(file, line);
-
-        
-
+        for(j = 0; j < 9; j++)
+            cellValue[i][j] = line[j] - '0';
     }
+    file.close();
 }
 
-
-void GRID::grid::backtracking()
+void GRID::grid::callBacktracking()
 {
-    int i, j, k;
-    int breakpoint[2];
-    cell *cellPointer, *prevCellPointer;
-    bool atLeastOneValid;
-
-    for(i = 0; i < 9; i++)
-    {
-        for ( j = 0; j < 9; j++)
-        {
-            cellPointer = &cellValue[i][j];
-
-            // cerca un numero valido aumentando sempre di uno e facendo controlli //
-
-            if(cellPointer->userValue == 0)
-            {
-                while (cellPointer->value <= 9)
-                {
-                    atLeastOneValid = false;
-                    if(controlls(i, j) && cellPointer->value != 0)
-                    {
-                        atLeastOneValid = true;
-                        break;
-                    }
-
-                    cellPointer->value ++;
-                }
-
-                // se non trova nessun numero valido cancella ogni numero dalla casella e torna indietro  aumentando di 1//
-                // probabilmente posso togliere il controllo dato che se trova un numero valido esegue il break          //
-                if(atLeastOneValid == false)
-                {
-                    cellPointer->value = 0;
-                    prevCellPointer->value++;
-                    backtracking();
-                }
-                
-                prevCellPointer = cellPointer;
-            }
-
-            
-
-        }
-        
-    }
+    backtracking(GRID::Coordinate (0,0));
 }
+
+/* 
+    return true se deve contrinuare a fare backtracking
+    false se ha completato  */
+bool GRID::grid::backtracking(GRID::Coordinate coord)
+{
+    std::vector<int> possValues = valoriPossibili(coord);
+    bool continueBacktracking = possValues.size() <= 0;
+    int originalValue = returnValue(coord);
+
+    if(originalValue <= 0)      // se uguale a 0 risolve senno va avanti
+    {
+        for(const int value:possValues)
+        {
+            cambiaValore(coord , value);
+            continueBacktracking = backtracking(++coord);
+
+            if(continueBacktracking)
+                cambiaValore(coord, originalValue);
+            else
+                break;
+        }
+
+        if(returnValue(coord) >= 1)
+            continueBacktracking = false;
+        
+        return continueBacktracking;
+    }
+    else if(coord.fineGriglia())
+        return continueBacktracking;
+    else
+        return backtracking(++coord);
+}
+
+/**
+ * CONTROLLO ORIZZONTALE
+ * */
 
 bool GRID::grid::orizzControll(int x, int y)
 {
     int i = x, j;
     bool validValue = true;
 
-    for(j = 1; j<9; j++)
+    for(j = 0; j<9; j++)
     {
         if(j != y)
         {
-            if(cellValue[x][j].value == cellValue[x][y].value)
+            if(cellValue[x][j] == cellValue[x][y])
             {
                 validValue = false;
                 break;
@@ -124,19 +124,21 @@ bool GRID::grid::orizzControll(int x, int y)
     }
 
     return validValue;
-
 }
 
+/**
+ * CONTROLLO VERTICALE
+ */
 bool GRID::grid::verticalControll(int x, int y)
 {
     int i = x, j;
     bool validValue = true;
 
-    for(j = 1; j<9; j++)
+    for(j = 0; j<9; j++)
     {
         if(j != x)
         {
-            if(cellValue[j][y].value == cellValue[x][y].value)
+            if(cellValue[j][y] == cellValue[x][y])
             {
                 validValue = false;
                 break;
@@ -145,9 +147,11 @@ bool GRID::grid::verticalControll(int x, int y)
     }
 
     return validValue;
-
 }
 
+/**
+ * CONTROLLO NEL QUADRATO
+ */
 bool GRID::grid::squareControll(int x, int y)
 {
     int xCentral, yCentral;
@@ -155,29 +159,29 @@ bool GRID::grid::squareControll(int x, int y)
     bool validValue = true;
 
     if(x >= 0 && x<=2)
-        xCentral = 2;
+        xCentral = 1;
     else if(x>=3 && x<=5)
         xCentral = 4;
     else if(x>=6 && x<=8)
         xCentral = 7;
 
     if(y >= 0 && y<=2)
-        yCentral = 2;
+        yCentral = 1;
     else if(y>=3 && y<=5)
         yCentral = 4;
     else if(y>=6 && y<=8)
         yCentral = 7;
 
-    for(i = xCentral-1; i<=xCentral+1; i++)
+    for(i = xCentral-1; i<=xCentral+1 && validValue == true; i++)
     {
-        for(j = yCentral-1; j<=yCentral+1; j++)
+        for(j = yCentral-1; j<=yCentral+1 && validValue == true; j++)
         {
-            if(i != x && j!=y)
+	
+            if(i != x || j!=y)
             {
-                if(cellValue[i][j].value == cellValue[x][y].value)
+                if(cellValue[i][j] == cellValue[x][y])
                 {
                     validValue = false;
-                    break;
                 }
             }
         }
@@ -186,25 +190,79 @@ bool GRID::grid::squareControll(int x, int y)
     return validValue;
 }
 
-bool GRID::grid::controlls(int x, int j)
+inline bool GRID::grid::controlls(int x, int y, int testValue)
 {
-    return (verticalControll(x, j) && orizzControll(x, j) && squareControll(x, j)) ? true:false;
+    bool result = false;
+    int value = cellValue[x][y];
+
+    cellValue[x][y] = testValue;
+    (verticalControll(x, y) && orizzControll(x,y) && squareControll(x,y)) ? result = true :result = false;
+    cellValue[x][y]= value;
+
+    return result;
+}
+
+std::vector<int> GRID::grid::valoriPossibili(Coordinate coord)
+{
+    std::list<int> arr = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    std::vector<int> result;
+    
+    for(auto &temp:arr)
+    {
+
+        if(controlls(coord.x(), coord.y(), temp))
+        {
+            result.push_back(temp);
+        }
+    }
+
+    /* for(const auto &x:result)
+    {
+        std::cout << x << " ";
+    }
+    std::cout << std::endl; */
+
+    return result;
+}
+
+GRID::Coordinate GRID::Coordinate::operator++()
+{
+    int x = coord.first;
+    int y = coord.second;
+     
+    if(x == 8)  {  x = 0;  y++; }
+    else if(x == 8 && y == 8)   { std::cout << "ci e` stato un problema" << std::endl;    throw 1; }
+    else
+        x++;
+        
+    return GRID::Coordinate(x, y);
 }
 
 
-void GRID::grid::printGrid()
+inline int GRID::Coordinate::x() {return coord.first;}
+inline int GRID::Coordinate::y() {return coord.second;}
+inline bool GRID::Coordinate::fineGriglia() {return (coord.first == 8 && coord.second == 8);}
+std::ostream& GRID::operator<<(std::ostream& os, const Coordinate& coor)
+{
+    return os << "x : " << coor.coord.first << " y : " << coor.coord.second << std::endl;
+}
+
+
+inline int GRID::grid::returnValue(Coordinate coord)  { return cellValue[coord.x()][coord.y()]; }
+inline void GRID::grid::cambiaValore(Coordinate coord, int newValue) { cellValue[coord.x()][coord.y()] = newValue; }
+
+int& GRID::grid::operator[](GRID::Coordinate coord) {return cellValue[coord.x()][coord.y()];}
+std::ostream& GRID::operator<<(std::ostream& os, grid& sudoku)
 {
     int i, j;
 
-    std::cout << std::endl;
-    std::cout << std::endl;
-    
-    for ( i = 0; i < 9; i++)
-    {
-        for ( j = 0; j < 9; j++)
-        {
-            std::cout << cellValue[i][j].value;
-        }
-        std::cout << std::endl;        
-    }    
+    os << std::endl << std::endl;
+    for ( i = 0; i < 9; i++) {
+        for ( j = 0; j < 9; j++) { GRID::Coordinate coord(i, j);  os << sudoku.returnValue(coord) << " "; }
+        os << std::endl;        
+    }
+
+    return os;
 }
+
+// operator non inline //

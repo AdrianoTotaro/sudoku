@@ -15,19 +15,13 @@ int main()
 
     std::cout << "Hai un sudoku da risolvere [s|n] : ";
     std::cin >> answer;
+    (answer == 's') ? sudoku.importGrid() : sudoku.importFromFile("sudoku.txt");
+    
+    std::cout << sudoku;
 
-    if (answer == 's')
-    {
-        sudoku.importGrid();
+    sudoku.callBacktracking();
 
-        // controlli //
-        sudoku.backtracking();
+    std::cout << sudoku;
 
-        // immetere valori //
-
-        // mostrare la soluzione //
-        sudoku.printGrid();
-
-    }
     return 0;
 }
